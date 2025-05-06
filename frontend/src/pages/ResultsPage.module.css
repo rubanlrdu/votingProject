@@ -1,0 +1,132 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+.error {
+    color: #dc3545;
+    background-color: #f8d7da;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.loading {
+    text-align: center;
+    color: #666;
+    font-size: 1.1rem;
+    padding: 2rem;
+}
+
+.pending {
+    text-align: center;
+    padding: 2rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pending h2 {
+    color: #666;
+    margin-bottom: 1rem;
+}
+
+.pending p {
+    color: #888;
+    margin-bottom: 1.5rem;
+}
+
+.results {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.results h2 {
+    text-align: center;
+    color: #444;
+    margin-bottom: 1.5rem;
+}
+
+.resultsList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.resultItem {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+
+.resultItem:hover {
+    transform: translateX(5px);
+}
+
+.rank {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+    margin-right: 1.5rem;
+    min-width: 48px;
+}
+
+.candidateInfo {
+    flex: 1;
+}
+
+.candidateInfo h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+}
+
+.stats {
+    display: flex;
+    gap: 1.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.refreshButton {
+    display: block;
+    margin: 0 auto;
+    padding: 0.75rem 1.5rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.refreshButton:hover {
+    background-color: #0056b3;
+}
+
+/* Add hover effect for the first three positions */
+.resultItem:nth-child(1) .rank {
+    color: #ffd700; /* Gold */
+}
+
+.resultItem:nth-child(2) .rank {
+    color: #c0c0c0; /* Silver */
+}
+
+.resultItem:nth-child(3) .rank {
+    color: #cd7f32; /* Bronze */
+} 

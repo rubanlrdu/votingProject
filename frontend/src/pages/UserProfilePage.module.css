@@ -1,0 +1,155 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #555;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 0.5rem;
+}
+
+.profileCard {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.profileCard p {
+  font-size: 1rem;
+  margin: 0.75rem 0;
+  color: #444;
+}
+
+.statusSection {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+.pending {
+  color: #ffc107;
+  font-weight: 600;
+}
+
+.approved {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.rejected {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.rejectionReason {
+  font-style: italic;
+  color: #dc3545;
+  margin-top: 0.5rem;
+}
+
+.faceSection {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: #f0f4f8;
+  border-radius: 6px;
+}
+
+.successText {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.warningText {
+  color: #ffc107;
+  font-weight: 500;
+}
+
+.enrollButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.2s;
+}
+
+.enrollButton:hover {
+  background-color: #0069d9;
+}
+
+.cancelButton {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.2s;
+}
+
+.cancelButton:hover {
+  background-color: #5a6268;
+}
+
+.faceEnrollmentContainer {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.completionRequirement {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: #fff3cd;
+  border-radius: 6px;
+  border-left: 4px solid #ffc107;
+}
+
+.completionRequirement h3 {
+  color: #856404;
+  margin-top: 0;
+}
+
+.completionRequirement ul {
+  margin-top: 0.5rem;
+  padding-left: 1.5rem;
+}
+
+.completionRequirement li {
+  margin-bottom: 0.5rem;
+  color: #856404;
+}
+
+.loading {
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  font-size: 1.2rem;
+}
+
+.error {
+  text-align: center;
+  color: #dc3545;
+  font-size: 1.2rem;
+} 

@@ -1,0 +1,14 @@
+1.Users can register, log in via backend, and sessions are managed. Hardcoded login is gone.
+2.Admin can log in, view a separate page, and add candidates to the database.
+3.Logged-in users can fetch dynamic candidates, submit scores which are saved to DB, user is marked as voted, re-voting is prevented, blockchain tx occurs.
+3.1 ui enhancements and fixed navigation issues.
+3.2. Blockchain Txn Fixed.
+4.Admin controls result visibility. Voters can only see results after the admin publishes them.
+5.Admin can view pending users, approve/reject them. Users can see their status and are blocked from voting until approved. Login returns status.
+5.1.Fixed Navigation issues, Fixed registration with demographics.
+5.4.Fixed Admin login using manual .env file entry
+5.5.able to add Additional Candidate data on admin dashboard and able to delete the existing candidates.
+5.6.Fixed Candidates Additional info visibility in voting page.
+6.Users can capture their face via webcam, face-api.js generates descriptors, and these are stored in the backend DB. This is linked to the user's profile/application.
+7.Approved users are prompted for face verification after password login. Frontend captures face, sends descriptor. Backend simulates comparison and returns success/fail, controlling access to voting.
+8.Added optional pre-vote face check, display enhanced candidate info, ensure overall flow works.

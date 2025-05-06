@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test POST Request</title>
+</head>
+<body>
+    <h1>Test POST Request</h1>
+    <button id="postButton">Send POST Request</button>
+    <div id="responseDiv"></div>
+
+    <script>
+    const postButton = document.getElementById('postButton');
+    const responseDiv = document.getElementById('responseDiv');
+
+    const testPostBody = {
+        "username": "testuser",
+        "password": "testpass123",
+        "full_name": "Test User",
+        "address": "123 Test Street",
+        "mobile_number": "1234567890",
+        "id_proof_filename": "test_id.jpg"
+    };
+
+    postButton.addEventListener('click', () => {
+        fetch('http://localhost:3000/test', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(testPostBody)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            responseDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        })
+        .catch(error => {
+            responseDiv.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
+        });
+    });
+    </script>
+</body>
+</html>
