@@ -568,4 +568,188 @@ router.post('/verify-face', (req, res) => {
   }
 });
 
+// Validate user for forgot password (facial reset)
+router.post('/forgot-password/validate-user', (req, res) => {
+    const { username, date_of_birth } = req.body;
+
+    // Basic validation
+    if (!username || !date_of_birth) {
+        return res.status(400).json({ error: 'Username and date of birth are required.' });
+    }
+
+    // Validate date format (reuse helper if available)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(date_of_birth)) {
+        return res.status(400).json({ error: 'Invalid date of birth format. Use YYYY-MM-DD.' });
+    }
+
+    // Query user by username
+    db.get<{
+        id: number;
+        username: string;
+        date_of_birth: string;
+        face_descriptors: string | null;
+    }>(
+        `SELECT id, username, date_of_birth, face_descriptors FROM users WHERE username = ?`,
+        [username],
+        (err, user) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+            if (!user) {
+                // Do not reveal if user exists
+                return res.status(404).json({ error: 'Invalid information or account not eligible for facial password reset.' });
+            }
+
+            // Compare date_of_birth (string compare is fine for YYYY-MM-DD)
+            if (user.date_of_birth !== date_of_birth) {
+                return res.status(403).json({ error: 'Invalid information or account not eligible for facial password reset.' });
+            }
+
+            // Check if face_descriptors is present and non-empty
+            if (!user.face_descriptors) {
+                return res.status(403).json({ error: 'Invalid information or account not eligible for facial password reset.' });
+            }
+
+            // Success: user is eligible for facial reset
+            return res.json({ success: true, userId: user.id });
+        }
+    );
+});
+
+// Forgot password face verification endpoint
+router.post('/forgot-password/verify-face', (req, res) => {
+    const { username, userId, liveDescriptor } = req.body;
+
+    // Validate input
+    if ((!username && !userId) || !Array.isArray(liveDescriptor) || liveDescriptor.length === 0) {
+        return res.status(400).json({ success: false, error: 'username or userId and a non-empty liveDescriptor array are required.' });
+    }
+
+    // Build query
+    let query = '';
+    let param: string | number;
+    if (userId) {
+        query = 'SELECT id, username, face_descriptors FROM users WHERE id = ?';
+        param = userId;
+    } else {
+        query = 'SELECT id, username, face_descriptors FROM users WHERE username = ?';
+        param = username;
+    }
+
+    // Fetch user and stored descriptor
+    db.get<{ id: number; username: string; face_descriptors: string | null }>(
+        query,
+        [param],
+        (err, user) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ success: false, error: 'Internal server error' });
+            }
+            if (!user || !user.face_descriptors) {
+                return res.status(404).json({ success: false, error: 'User not found or no face data enrolled.' });
+            }
+
+            let storedDescriptor: number[];
+            try {
+                storedDescriptor = JSON.parse(user.face_descriptors);
+            } catch (parseError) {
+                console.error('Error parsing stored face descriptor:', parseError);
+                return res.status(500).json({ success: false, error: 'Failed to process stored face data' });
+            }
+
+            // Compare descriptors (Euclidean distance, threshold 0.6 as in /verify-face)
+            let distance = 0;
+            for (let i = 0; i < liveDescriptor.length; i++) {
+                const diff = liveDescriptor[i] - storedDescriptor[i];
+                distance += diff * diff;
+            }
+            distance = Math.sqrt(distance);
+            const threshold = 0.6;
+            const verified = distance < threshold;
+
+            if (verified) {
+                return res.json({ success: true, userId: user.id, username: user.username });
+            } else {
+                return res.json({ success: false });
+            }
+        }
+    );
+});
+
+// Forgot password reset endpoint
+router.post('/forgot-password/reset', async (req, res) => {
+    const { username, userId, newPassword, resetToken } = req.body;
+
+    // Validate input
+    if ((!username && !userId) || !newPassword) {
+        return res.status(400).json({ error: 'username or userId and newPassword are required.' });
+    }
+
+    // Validate newPassword (e.g., minimum length)
+    if (newPassword.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
+    }
+
+    // If resetToken is provided, validate it (simulated here)
+    if (resetToken) {
+        // Simulate token validation (replace with actual token validation logic)
+        const isValidToken = true; // Replace with actual validation
+        if (!isValidToken) {
+            return res.status(403).json({ error: 'Invalid or expired reset token.' });
+        }
+    }
+
+    // Build query to find user
+    let query = '';
+    let param: string | number;
+    if (userId) {
+        query = 'SELECT id FROM users WHERE id = ?';
+        param = userId;
+    } else {
+        query = 'SELECT id FROM users WHERE username = ?';
+        param = username;
+    }
+
+    // Fetch user
+    db.get<{ id: number }>(query, [param], async (err, user) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        try {
+            // Hash newPassword
+            const saltRounds = 10;
+            const passwordHash = await bcrypt.hash(newPassword, saltRounds);
+
+            // Update user's password_hash
+            db.run('UPDATE users SET password_hash = ? WHERE id = ?', [passwordHash, user.id], function(err) {
+                if (err) {
+                    console.error('Database error:', err);
+                    return res.status(500).json({ error: 'Failed to update password.' });
+                }
+                if (this.changes === 0) {
+                    return res.status(404).json({ error: 'User not found.' });
+                }
+
+                // If using a reset token, invalidate it here (simulated)
+                if (resetToken) {
+                    // Simulate token invalidation (replace with actual logic)
+                    console.log('Reset token invalidated for user:', user.id);
+                }
+
+                return res.json({ message: 'Password updated successfully.' });
+            });
+        } catch (hashError) {
+            console.error('Password hashing error:', hashError);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    });
+});
+
 export default router; 

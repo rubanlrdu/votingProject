@@ -7,12 +7,14 @@ interface FaceVerificationProps {
   userId: string;
   onVerificationSuccess: () => void;
   onVerificationFail: () => void;
+  mode?: 'login' | 'password-reset';
 }
 
 const FaceVerification: React.FC<FaceVerificationProps> = ({ 
   userId, 
   onVerificationSuccess, 
-  onVerificationFail 
+  onVerificationFail,
+  mode = 'login'
 }) => {
   // Refs
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -264,55 +266,49 @@ const FaceVerification: React.FC<FaceVerificationProps> = ({
   
   // Handle verification process
   const handleVerifyFace = async () => {
-    if (!faceDescriptor) {
-      setMessage('No face detected yet. Please position yourself properly.');
-      return;
-    }
-    
+    if (!faceDescriptor) return;
+
     try {
       setVerificationStatus('processing');
-      setMessage('Verifying your face...');
-      
-      // Convert descriptor to regular array for JSON
+      setMessage('Verifying face...');
+
+      // Convert Float32Array to regular array for JSON serialization
       const descriptorArray = Array.from(faceDescriptor);
-      
-      // Send to backend for verification
-      const response = await fetch('http://localhost:3001/api/auth/verify-face', {
+
+      // Choose endpoint based on mode
+      const endpoint = mode === 'password-reset' 
+        ? 'http://localhost:3001/api/auth/forgot-password/verify-face'
+        : 'http://localhost:3001/api/auth/verify-face';
+
+      // Prepare request body based on mode
+      const requestBody = mode === 'password-reset'
+        ? { username: userId, liveDescriptor: descriptorArray }
+        : { userId, faceDescriptor: descriptorArray };
+
+      const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
-        body: JSON.stringify({
-          userId,
-          faceDescriptor: descriptorArray
-        })
+        body: JSON.stringify(requestBody)
       });
-      
+
       const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Face verification failed');
-      }
-      
-      if (data.verified) {
+
+      if (data.success) {
         setVerificationStatus('success');
         setMessage('Face verification successful!');
-        
-        // Stop detection when verification is successful
-        if (detectionInterval) {
-          clearInterval(detectionInterval);
-          setDetectionInterval(null);
-        }
-        
         onVerificationSuccess();
       } else {
         setVerificationStatus('failed');
-        setMessage(`Verification failed: ${data.message || 'Face does not match enrolled data'}`);
+        setMessage('Face verification failed. Please try again.');
         onVerificationFail();
       }
     } catch (error) {
-      console.error('Verification error:', error);
+      console.error('Face verification error:', error);
       setVerificationStatus('failed');
-      setMessage(`Error: ${error instanceof Error ? error.message : 'Failed to verify face'}`);
+      setMessage('An error occurred during verification. Please try again.');
       onVerificationFail();
     }
   };

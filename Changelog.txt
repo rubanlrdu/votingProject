@@ -12,3 +12,5 @@
 6.Users can capture their face via webcam, face-api.js generates descriptors, and these are stored in the backend DB. This is linked to the user's profile/application.
 7.Approved users are prompted for face verification after password login. Frontend captures face, sends descriptor. Backend simulates comparison and returns success/fail, controlling access to voting.
 8.Added optional pre-vote face check, display enhanced candidate info, ensure overall flow works.
+9.added forgot password option.
+9.1.added missing elements for navigation.

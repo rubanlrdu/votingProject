@@ -389,4 +389,34 @@
 
 .pdfLink:hover {
     background-color: #e0e0e0;
+}
+
+.homeButton {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 1.5rem;
+}
+
+.homeButton:hover {
+    background-color: #5a6268;
+}
+
+.backButton {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 1.5rem;
+}
+
+.backButton:hover {
+    background-color: #5a6268;
 } 

@@ -299,6 +299,12 @@ const AdminPage: React.FC = () => {
     return (
         <div className={styles.container}>
             <h1 className={styles.title}>Admin Dashboard</h1>
+            <button 
+                onClick={() => navigate('/')}
+                className={styles.homeButton}
+            >
+                Back to Home
+            </button>
             
             <div className={styles.tabs}>
                 <button
@@ -414,13 +420,7 @@ const AdminPage: React.FC = () => {
                                             <td>{candidate.name}</td>
                                             <td>{candidate.date_of_birth ? formatDate(candidate.date_of_birth) : '-'}</td>
                                             <td>{candidate.party || '-'}</td>
-                                            <td className={styles.actionButtons}>
-                                                <button 
-                                                    className={`${styles.button} ${styles.editButton}`}
-                                                    onClick={() => {/* TODO: Implement edit functionality */}}
-                                                >
-                                                    Edit
-                                                </button>
+                                            <td>
                                                 <button 
                                                     className={`${styles.button} ${styles.deleteButton}`}
                                                     onClick={() => handleDeleteCandidate(candidate.id)}
@@ -456,6 +456,12 @@ const AdminPage: React.FC = () => {
             {activeTab === 'applications' && (
                 <section className={styles.section}>
                     <h2>Pending User Applications</h2>
+                    <button 
+                        onClick={() => setActiveTab('dashboard')}
+                        className={styles.backButton}
+                    >
+                        Back to Dashboard
+                    </button>
                     
                     {error && <div className={styles.error}>{error}</div>}
                     {successMessage && <div className={styles.success}>{successMessage}</div>}

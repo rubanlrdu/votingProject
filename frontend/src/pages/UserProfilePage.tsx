@@ -90,6 +90,12 @@ const UserProfilePage: React.FC = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Your Profile</h1>
+      <button 
+        onClick={() => navigate('/')}
+        className={styles.homeButton}
+      >
+        Back to Home
+      </button>
       
       <div className={styles.profileCard}>
         <h2 className={styles.subtitle}>Account Information</h2>

@@ -7,6 +7,9 @@ import AdminPage from './pages/AdminPage'
 import VotingPage from './pages/VotingPage'
 import ResultsPage from './pages/ResultsPage'
 import UserProfilePage from './pages/UserProfilePage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordFaceVerifyPage from './pages/ResetPasswordFaceVerifyPage'
+import ResetPasswordNewPasswordPage from './pages/ResetPasswordNewPasswordPage'
 import UserProfileStatus from './components/UserProfileStatus'
 import { loadFaceApiModels } from './utils/faceApiHelper'
 import './App.css'
@@ -154,7 +157,6 @@ const AppContent: React.FC = () => {
           element={
             <ProtectedRoute>
               <div className="main-container">
-                {!user?.isAdmin && <UserProfileStatus />}
                 <div className="content-container">
                   <h1>Welcome, {user?.username}!</h1>
                   {user && !user.isAdmin && (
@@ -216,6 +218,9 @@ const App: React.FC = () => {
           } />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password/face-verify" element={<ResetPasswordFaceVerifyPage />} />
+          <Route path="/reset-password/new-password" element={<ResetPasswordNewPasswordPage />} />
           <Route path="/profile" element={
             <ProtectedRoute>
               <UserProfilePage />

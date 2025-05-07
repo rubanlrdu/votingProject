@@ -162,6 +162,9 @@ const LoginPage: React.FC = () => {
                             >
                                 {isLoading ? 'Logging in...' : 'Login'}
                             </button>
+                            <p>
+                                <a href="/forgot-password">Forgot Password?</a>
+                            </p>
                         </form>
                         <p className={styles.registerLink}>
                             Don't have an account?{' '}

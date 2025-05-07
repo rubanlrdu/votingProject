@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './ResultsPage.module.css';
+import { useNavigate } from 'react-router-dom';
 
 interface CandidateResult {
     id: number;
@@ -17,6 +18,7 @@ const ResultsPage: React.FC = () => {
     const [results, setResults] = useState<CandidateResult[] | null>(null);
     const [status, setStatus] = useState<'loading' | 'published' | 'pending'>('loading');
     const [error, setError] = useState<string>('');
+    const navigate = useNavigate();
 
     const fetchResults = async () => {
         try {
@@ -107,6 +109,12 @@ const ResultsPage: React.FC = () => {
     return (
         <div className={styles.container}>
             <h1 className={styles.title}>Election Results</h1>
+            <button 
+                onClick={() => navigate('/')}
+                className={styles.homeButton}
+            >
+                Back to Home
+            </button>
             {renderContent()}
         </div>
     );

@@ -191,6 +191,12 @@ const VotingPage: React.FC = () => {
                 <div className={styles.message}>
                     You have already submitted your vote. Thank you for participating!
                 </div>
+                <button 
+                    onClick={() => navigate('/')}
+                    className={styles.homeButton}
+                >
+                    Back to Home
+                </button>
             </div>
         );
     }
@@ -198,6 +204,12 @@ const VotingPage: React.FC = () => {
     return (
         <div className={styles.container}>
             <h1 className={styles.title}>Vote for Candidates</h1>
+            <button 
+                onClick={() => navigate('/')}
+                className={styles.homeButton}
+            >
+                Back to Home
+            </button>
             
             {error && <div className={styles.error}>{error}</div>}
             {message && <div className={styles.success}>{message}</div>}
