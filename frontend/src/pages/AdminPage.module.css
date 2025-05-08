@@ -421,4 +421,131 @@
 
 .backButton:hover {
     background-color: #5a6268;
+}
+
+.modal {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.textarea:focus {
+    outline: none;
+    border-color: #18d3c2;
+}
+
+.modalButtons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+.photoComparison {
+    display: flex;
+    gap: 2rem;
+    margin: 1rem 0;
+    flex-wrap: wrap;
+}
+
+.photoContainer {
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.photoContainer strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.verificationImage {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.applicationCard {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.applicationDetails {
+    margin-top: 1rem;
+}
+
+.applicationDetails p {
+    margin: 0.5rem 0;
+    color: #495057;
+}
+
+.applicationActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.approveButton {
+    background-color: #28a745;
+    color: white;
+}
+
+.approveButton:hover {
+    background-color: #218838;
+}
+
+.rejectButton {
+    background-color: #dc3545;
+    color: white;
+}
+
+.rejectButton:hover {
+    background-color: #c82333;
+}
+
+.enrolled {
+    color: #28a745;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    background-color: #d4edda;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.notEnrolled {
+    color: #dc3545;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    background-color: #f8d7da;
+    border-radius: 4px;
+    display: inline-block;
 } 

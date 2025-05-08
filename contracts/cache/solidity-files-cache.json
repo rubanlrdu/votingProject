@@ -1,9 +1,9 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "C:\\Users\\ruban\\OneDrive\\Desktop\\projectVote Main\\contracts\\contracts\\SimpleVoteRecorder.sol": {
-      "lastModificationDate": 1746160532980,
-      "contentHash": "0461e116ed1d6373f86b3dd41f97ef36",
+    "C:\\Users\\ruban\\OneDrive\\Desktop\\projectVote Main - v9.2 test\\contracts\\contracts\\SimpleVoteRecorder.sol": {
+      "lastModificationDate": 1746714173241,
+      "contentHash": "09be5a266ae7b166f7bba243e95c28b9",
       "sourceName": "contracts/SimpleVoteRecorder.sol",
       "solcConfig": {
         "version": "0.8.20",
@@ -34,7 +34,7 @@
         "^0.8.0"
       ],
       "artifacts": [
-        "SimpleVoteRecorder"
+        "SimpleVoteRecorderWithFeatures"
       ]
     }
   }

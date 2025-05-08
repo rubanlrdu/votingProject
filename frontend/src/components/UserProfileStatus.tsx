@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './UserProfileStatus.module.css';
 
 interface UserProfileData {
@@ -18,7 +18,8 @@ const UserProfileStatus: React.FC = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [hasFaceDescriptor, setHasFaceDescriptor] = useState(false);
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!user) return;
@@ -66,6 +67,32 @@ const UserProfileStatus: React.FC = () => {
     let statusClass = '';
     let additionalInfo = null;
 
+    const handleDeleteApplication = async () => {
+        if (window.confirm("Are you sure you want to delete your current application? This action cannot be undone, and you will need to register again.")) {
+            try {
+                const response = await fetch('http://localhost:3001/api/auth/my-application', {
+                    method: 'DELETE',
+                    credentials: 'include',
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to delete application');
+                }
+
+                // Logout user and clear session
+                await logout();
+                
+                // Show success message and redirect
+                alert('Your application has been successfully deleted. Please register again.');
+                navigate('/register');
+            } catch (error) {
+                console.error('Error deleting application:', error);
+                alert(error instanceof Error ? error.message : 'Could not delete application');
+            }
+        }
+    };
+
     switch (profileData.application_status) {
         case 'Pending':
             statusMessage = 'Your application is pending review.';
@@ -88,8 +115,26 @@ const UserProfileStatus: React.FC = () => {
             statusClass = styles.approved;
             break;
         case 'Rejected':
-            statusMessage = `Your application was rejected.${profileData.rejection_reason ? ` Reason: ${profileData.rejection_reason}` : ''}`;
+            statusMessage = 'Your application has been rejected.';
             statusClass = styles.rejected;
+            additionalInfo = (
+                <div className={styles.rejectionInfo}>
+                    <p>
+                        <strong>Reason:</strong>{' '}
+                        {profileData.rejection_reason ? (
+                            profileData.rejection_reason
+                        ) : (
+                            'No specific reason was provided.'
+                        )}
+                    </p>
+                    <button
+                        onClick={handleDeleteApplication}
+                        className={styles.deleteButton}
+                    >
+                        Delete My Application and Start Over
+                    </button>
+                </div>
+            );
             break;
         default:
             statusMessage = 'Your application status is unknown.';

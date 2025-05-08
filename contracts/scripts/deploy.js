@@ -2,7 +2,7 @@ const hre = require("hardhat");
 
 async function main() {
   // Get the contract factory
-  const SimpleVoteRecorder = await hre.ethers.getContractFactory("SimpleVoteRecorder");
+  const SimpleVoteRecorder = await hre.ethers.getContractFactory("SimpleVoteRecorderWithFeatures");
   
   // Deploy the contract
   console.log("Deploying SimpleVoteRecorder...");

@@ -6,42 +6,63 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 
+// Define types for multer files
+interface MulterFiles {
+    [fieldname: string]: Express.Multer.File[];
+}
+
 const router = Router();
 
-// Set up ID proof upload directory
-const ID_PROOF_UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads', 'id_proofs');
+// Set up upload directories
+const UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads');
+const ID_PROOF_UPLOAD_DIR = path.join(UPLOAD_DIR, 'id_proofs');
+const REALTIME_PHOTO_UPLOAD_DIR = path.join(UPLOAD_DIR, 'realtime_photos');
 
-// Ensure upload directory exists
-if (!fs.existsSync(ID_PROOF_UPLOAD_DIR)) {
-    fs.mkdirSync(ID_PROOF_UPLOAD_DIR, { recursive: true });
-}
+// Ensure upload directories exist
+[ID_PROOF_UPLOAD_DIR, REALTIME_PHOTO_UPLOAD_DIR].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+});
 
 // Configure multer storage
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, ID_PROOF_UPLOAD_DIR);
+        // Determine destination based on field name
+        const dest = file.fieldname === 'idProof' ? ID_PROOF_UPLOAD_DIR : REALTIME_PHOTO_UPLOAD_DIR;
+        cb(null, dest);
     },
     filename: function (req, file, cb) {
         // Generate a unique filename: e.g., timestamp + originalname
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.round(Math.random() * 1E9));
         cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     }
 });
 
-// Create multer upload instance with file filter for images
-const uploadIdProof = multer({
+// Create multer upload instance for registration
+const registrationUploads = multer({
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit per file
     fileFilter: function (req, file, cb) {
-        const filetypes = /jpeg|jpg|png|pdf/; // Allow PDF too
-        const mimetype = filetypes.test(file.mimetype);
-        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-        if (mimetype && extname) {
+        const filetypes = /jpeg|jpg|png|pdf/; // PDF for ID proof
+        const imageFiletypes = /jpeg|jpg|png/; // Images only for realtime photo
+        let allowed = false;
+
+        if (file.fieldname === "idProof") {
+            allowed = filetypes.test(file.mimetype) && filetypes.test(path.extname(file.originalname).toLowerCase());
+        } else if (file.fieldname === "realtimePhoto") {
+            allowed = imageFiletypes.test(file.mimetype) && imageFiletypes.test(path.extname(file.originalname).toLowerCase());
+        }
+
+        if (allowed) {
             return cb(null, true);
         }
-        cb(new Error("Error: File upload only supports the following filetypes - " + filetypes));
+        cb(new Error("Error: Invalid file type for " + file.fieldname));
     }
-}).single('idProof'); // 'idProof' must match the field name in FormData
+}).fields([
+    { name: 'idProof', maxCount: 1 },
+    { name: 'realtimePhoto', maxCount: 1 }
+]);
 
 // Validation helper functions
 const validateMobileNumber = (mobile: string): boolean => {
@@ -88,7 +109,7 @@ const isValidDateFormat = (dateString: string): boolean => {
 };
 
 router.post('/register', (req, res) => {
-    uploadIdProof(req, res, async (err: any) => {
+    registrationUploads(req, res, async (err: any) => {
         if (err instanceof multer.MulterError) {
             // A Multer error occurred when uploading.
             return res.status(400).json({ message: "File upload error: " + err.message });
@@ -97,7 +118,7 @@ router.post('/register', (req, res) => {
             return res.status(500).json({ message: "Unknown file upload error: " + err.message });
         }
 
-        // File upload was successful (or no file was provided, which is fine if optional)
+        // File upload was successful (or no file was provided)
         const { 
             username, 
             password, 
@@ -108,8 +129,19 @@ router.post('/register', (req, res) => {
             date_of_birth
         } = req.body;
         
-        const idProofFile = req.file; // Contains file info if uploaded
+        // Access uploaded files with proper typing
+        const files = req.files as MulterFiles;
+        const idProofFile = files['idProof']?.[0] || null;
+        const realtimePhotoFile = files['realtimePhoto']?.[0] || null;
         
+        // Check if both files were uploaded
+        if (!idProofFile) {
+            return res.status(400).json({ error: 'National ID Proof is required' });
+        }
+        if (!realtimePhotoFile) {
+            return res.status(400).json({ error: 'Real-time photo is required' });
+        }
+
         console.log('Registration attempt:', { 
             username, 
             isAdmin,
@@ -117,7 +149,8 @@ router.post('/register', (req, res) => {
             address,
             mobile_number,
             date_of_birth,
-            id_proof_filename: idProofFile ? idProofFile.filename : null
+            id_proof_filename: idProofFile ? idProofFile.filename : null,
+            realtime_photo_filename: realtimePhotoFile ? realtimePhotoFile.filename : null
         });
 
         // Basic validation
@@ -173,10 +206,11 @@ router.post('/register', (req, res) => {
                             mobile_number,
                             date_of_birth,
                             id_proof_filename,
+                            realtime_photo_filename,
                             application_status,
                             has_voted, 
                             is_admin
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending', 0, ?)`,
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending', 0, ?)`,
                         [
                             username, 
                             passwordHash, 
@@ -185,6 +219,7 @@ router.post('/register', (req, res) => {
                             mobile_number || null,
                             date_of_birth || null,
                             idProofFile ? idProofFile.filename : null,
+                            realtimePhotoFile ? realtimePhotoFile.filename : null,
                             isAdminInt
                         ],
                         function(err) {
@@ -750,6 +785,94 @@ router.post('/forgot-password/reset', async (req, res) => {
             return res.status(500).json({ error: 'Internal server error' });
         }
     });
+});
+
+// Delete rejected application endpoint
+router.delete('/my-application', (req, res) => {
+    // Check if user is authenticated
+    if (!req.session.user) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const userId = req.session.user.id;
+    const username = req.session.user.username;
+
+    console.log(`Attempting to delete rejected application for user: ${username} (ID: ${userId})`);
+
+    // First, verify the user exists and has a rejected status
+    db.get<{
+        id: number;
+        application_status: string;
+        id_proof_filename: string | null;
+    }>(
+        'SELECT id, application_status, id_proof_filename FROM users WHERE id = ?',
+        [userId],
+        async (err, user) => {
+            if (err) {
+                console.error('Database error when checking user status:', err);
+                return res.status(500).json({ error: 'Internal server error' });
+            }
+
+            if (!user) {
+                console.log(`User not found for deletion attempt: ${username} (ID: ${userId})`);
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            if (user.application_status !== 'Rejected') {
+                console.log(`Invalid deletion attempt - User ${username} has status: ${user.application_status}`);
+                return res.status(403).json({ 
+                    error: 'Application cannot be deleted at this status',
+                    currentStatus: user.application_status
+                });
+            }
+
+            try {
+                // Delete ID proof file if it exists
+                if (user.id_proof_filename) {
+                    const filePath = path.join(ID_PROOF_UPLOAD_DIR, user.id_proof_filename);
+                    fs.unlink(filePath, (err) => {
+                        if (err) {
+                            console.error(`Failed to delete ID proof file ${filePath}:`, err);
+                            // Continue with deletion even if file removal fails
+                        } else {
+                            console.log(`Successfully deleted ID proof file: ${filePath}`);
+                        }
+                    });
+                }
+
+                // Delete user record from database
+                db.run('DELETE FROM users WHERE id = ?', [userId], function(err) {
+                    if (err) {
+                        console.error('Database error when deleting user:', err);
+                        return res.status(500).json({ error: 'Failed to delete application' });
+                    }
+
+                    if (this.changes === 0) {
+                        console.log(`No user record found for deletion: ${username} (ID: ${userId})`);
+                        return res.status(404).json({ error: 'User not found' });
+                    }
+
+                    console.log(`Successfully deleted user record: ${username} (ID: ${userId})`);
+
+                    // Destroy user's session
+                    req.session.destroy((err) => {
+                        if (err) {
+                            console.error('Error destroying session:', err);
+                            // Continue with success response even if session destruction fails
+                        }
+                        
+                        res.status(200).json({ 
+                            message: 'Application deleted successfully. You can now register again.',
+                            username: username
+                        });
+                    });
+                });
+            } catch (error) {
+                console.error('Error during application deletion:', error);
+                res.status(500).json({ error: 'Internal server error during deletion' });
+            }
+        }
+    );
 });
 
 export default router; 

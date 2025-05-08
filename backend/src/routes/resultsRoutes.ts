@@ -10,6 +10,7 @@ interface ElectionState {
 interface VoteResult {
     id: number;
     name: string;
+    image_url: string;
     total_score: number;
     vote_count: number;
 }
@@ -34,6 +35,7 @@ router.get('/', (req, res) => {
             SELECT 
                 c.id,
                 c.name,
+                c.image_url,
                 SUM(v.score) as total_score,
                 COUNT(v.id) as vote_count
             FROM candidates c
@@ -53,6 +55,7 @@ router.get('/', (req, res) => {
                 results: results.map(row => ({
                     id: row.id,
                     name: row.name,
+                    image_url: row.image_url,
                     totalScore: row.total_score || 0,
                     voteCount: row.vote_count || 0
                 }))

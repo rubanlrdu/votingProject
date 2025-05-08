@@ -11,6 +11,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordFaceVerifyPage from './pages/ResetPasswordFaceVerifyPage'
 import ResetPasswordNewPasswordPage from './pages/ResetPasswordNewPasswordPage'
 import UserProfileStatus from './components/UserProfileStatus'
+import Header from './components/Header'
 import { loadFaceApiModels } from './utils/faceApiHelper'
 import './App.css'
 
@@ -107,6 +108,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="app">
+      <Header />
       <nav className="navbar">
         <div className="nav-links">
           <Link to="/">Home</Link>
@@ -135,6 +137,9 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/face-verify" element={<ResetPasswordFaceVerifyPage />} />
+        <Route path="/reset-password/new-password" element={<ResetPasswordNewPasswordPage />} />
         <Route path="/results" element={<ResultsPage />} />
         <Route
           path="/profile"
@@ -215,38 +220,7 @@ const App: React.FC = () => {
             {modelError}
           </div>
         )}
-        <Routes>
-          <Route path="*" element={
-            <ProtectedRoute>
-              <AppContent />
-            </ProtectedRoute>
-          } />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password/face-verify" element={<ResetPasswordFaceVerifyPage />} />
-          <Route path="/reset-password/new-password" element={<ResetPasswordNewPasswordPage />} />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <UserProfilePage />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin" element={
-            <AdminRoute>
-              <AdminPage />
-            </AdminRoute>
-          } />
-          <Route path="/vote" element={
-            <VoteRoute>
-              <VotingPage />
-            </VoteRoute>
-          } />
-          <Route path="/results" element={
-            <ProtectedRoute>
-              <ResultsPage />
-            </ProtectedRoute>
-          } />
-        </Routes>
+        <AppContent />
       </Router>
     </AuthProvider>
   );

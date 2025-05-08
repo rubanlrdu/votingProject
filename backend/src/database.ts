@@ -20,7 +20,8 @@ export const initializeDatabase = (): void => {
                 application_status TEXT DEFAULT 'Pending',
                 rejection_reason TEXT NULL,
                 has_voted BOOLEAN DEFAULT FALSE,
-                is_admin BOOLEAN DEFAULT FALSE
+                is_admin BOOLEAN DEFAULT FALSE,
+                realtime_photo_filename TEXT NULL
             )
         `, (err: Error | null) => {
             if (err) {
@@ -37,7 +38,8 @@ export const initializeDatabase = (): void => {
                     'face_descriptors TEXT NULL',
                     'date_of_birth TEXT NULL',
                     'application_status TEXT DEFAULT "Pending"',
-                    'rejection_reason TEXT NULL'
+                    'rejection_reason TEXT NULL',
+                    'realtime_photo_filename TEXT NULL'
                 ];
 
                 newColumns.forEach(column => {

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 interface CandidateResult {
     id: number;
     name: string;
+    image_url?: string;
     totalScore: number;
     voteCount: number;
 }
@@ -87,10 +88,21 @@ const ResultsPage: React.FC = () => {
                         <div key={candidate.id} className={styles.resultItem}>
                             <div className={styles.rank}>#{index + 1}</div>
                             <div className={styles.candidateInfo}>
-                                <h3>{candidate.name}</h3>
-                                <div className={styles.stats}>
-                                    <span>Total Score: {candidate.totalScore}</span>
-                                    <span>Votes: {candidate.voteCount}</span>
+                                {candidate.image_url && (
+                                    <div className={styles.imageContainer}>
+                                        <img 
+                                            src={candidate.image_url} 
+                                            alt={candidate.name}
+                                            className={styles.candidateImage}
+                                        />
+                                    </div>
+                                )}
+                                <div className={styles.candidateDetails}>
+                                    <h3>{candidate.name}</h3>
+                                    <div className={styles.stats}>
+                                        <span>Total Score: {candidate.totalScore}</span>
+                                        <span>Votes: {candidate.voteCount}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -109,12 +121,7 @@ const ResultsPage: React.FC = () => {
     return (
         <div className={styles.container}>
             <h1 className={styles.title}>Election Results</h1>
-            <button 
-                onClick={() => navigate('/')}
-                className={styles.homeButton}
-            >
-                Back to Home
-            </button>
+            
             {renderContent()}
         </div>
     );

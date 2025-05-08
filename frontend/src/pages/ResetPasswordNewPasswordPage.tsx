@@ -2,6 +2,7 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import styles from './ResetPasswordNewPasswordPage.module.css';
 
 const ResetPasswordNewPasswordPage: React.FC = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -82,18 +83,18 @@ const ResetPasswordNewPasswordPage: React.FC = () => {
     }
 
     return (
-        <div>
-            <h1>Reset Password</h1>
-            <p>Please enter your new password below.</p>
+        <div className={styles.container}>
+            <h1 className={styles.title}>Reset Password</h1>
+            <p className={styles.description}>Please enter your new password below.</p>
 
             {success ? (
-                <div style={{ color: 'green' }}>
+                <div className={styles.success}>
                     Password reset successful! Redirecting to login...
                 </div>
             ) : (
-                <form onSubmit={handleSubmit}>
-                    <div>
-                        <label htmlFor="newPassword">New Password:</label>
+                <form onSubmit={handleSubmit} className={styles.form}>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="newPassword" className={styles.label}>New Password:</label>
                         <input
                             type="password"
                             id="newPassword"
@@ -102,10 +103,11 @@ const ResetPasswordNewPasswordPage: React.FC = () => {
                             required
                             minLength={8}
                             placeholder="Enter new password"
+                            className={styles.input}
                         />
                     </div>
-                    <div>
-                        <label htmlFor="confirmPassword">Confirm Password:</label>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="confirmPassword" className={styles.label}>Confirm Password:</label>
                         <input
                             type="password"
                             id="confirmPassword"
@@ -114,29 +116,36 @@ const ResetPasswordNewPasswordPage: React.FC = () => {
                             required
                             minLength={8}
                             placeholder="Confirm new password"
+                            className={styles.input}
                         />
                     </div>
 
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    {error && <div className={styles.error}>{error}</div>}
 
-                    <div>
-                        <button type="submit" disabled={loading}>
+                    <div className={styles.buttonGroup}>
+                        <button 
+                            type="submit" 
+                            disabled={loading}
+                            className={`${styles.button} ${styles.submitButton}`}
+                        >
                             {loading ? 'Resetting Password...' : 'Reset Password'}
                         </button>
                         <button 
                             type="button" 
                             onClick={() => navigate('/login')}
-                            style={{ marginLeft: '10px' }}
+                            className={`${styles.button} ${styles.cancelButton}`}
                         >
                             Cancel
                         </button>
                     </div>
 
-                    <div style={{ marginTop: '20px', fontSize: '0.9em' }}>
-                        <p>Password requirements:</p>
-                        <ul>
+                    <div className={styles.requirements}>
+                        <p className={styles.requirementsTitle}>Password requirements:</p>
+                        <ul className={styles.requirementsList}>
                             <li>At least 8 characters long</li>
-                            {/* Add more password requirements as needed */}
+                            <li>Must contain at least one uppercase letter</li>
+                            <li>Must contain at least one number</li>
+                            <li>Must contain at least one special character</li>
                         </ul>
                     </div>
                 </form>

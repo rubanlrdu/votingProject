@@ -24,6 +24,7 @@ export interface User {
     rejection_reason?: string;
     is_admin: boolean;
     has_voted: boolean;
+    realtime_photo_filename?: string;
 }
 
 export interface Vote {

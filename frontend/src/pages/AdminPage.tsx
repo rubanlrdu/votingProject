@@ -28,6 +28,7 @@ interface PendingUser {
     mobile_number: string | null;
     date_of_birth: string | null;
     id_proof_filename: string | null;
+    realtime_photo_filename: string | null;
     face_descriptors: string | null;
 }
 
@@ -39,6 +40,62 @@ interface NewCandidate {
 }
 
 type AdminTab = 'dashboard' | 'applications';
+
+interface RejectionModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSubmit: (reason: string) => Promise<void>;
+    isLoading: boolean;
+}
+
+const RejectionModal: React.FC<RejectionModalProps> = ({ isOpen, onClose, onSubmit, isLoading }) => {
+    const [reason, setReason] = useState('');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await onSubmit(reason);
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className={styles.modalOverlay}>
+            <div className={styles.modal}>
+                <h3>Reject Application</h3>
+                <form onSubmit={handleSubmit}>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="rejectionReason">Reason for rejection (optional):</label>
+                        <textarea
+                            id="rejectionReason"
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+                            placeholder="Enter reason for rejection..."
+                            className={styles.textarea}
+                            rows={4}
+                        />
+                    </div>
+                    <div className={styles.modalButtons}>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className={`${styles.button} ${styles.cancelButton}`}
+                            disabled={isLoading}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className={`${styles.button} ${styles.rejectButton}`}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Rejecting...' : 'Reject Application'}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
 
 const AdminPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
@@ -59,6 +116,8 @@ const AdminPage: React.FC = () => {
     const [isPublishing, setIsPublishing] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
     const [userToReject, setUserToReject] = useState<number | null>(null);
+    const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
     const navigate = useNavigate();
     const { user } = useAuth();
 
@@ -210,30 +269,30 @@ const AdminPage: React.FC = () => {
     };
 
     const openRejectDialog = (userId: number) => {
-        setUserToReject(userId);
-        setRejectionReason('');
+        setSelectedUserId(userId);
+        setIsRejectModalOpen(true);
     };
 
     const closeRejectDialog = () => {
-        setUserToReject(null);
-        setRejectionReason('');
+        setSelectedUserId(null);
+        setIsRejectModalOpen(false);
     };
 
-    const handleRejectUser = async () => {
-        if (!userToReject) return;
+    const handleRejectUser = async (reason: string) => {
+        if (!selectedUserId) return;
         
         try {
             setIsLoading(true);
             setError('');
             setSuccessMessage('');
             
-            const response = await fetch(`http://localhost:3001/api/admin/users/${userToReject}/reject`, {
+            const response = await fetch(`http://localhost:3001/api/admin/users/${selectedUserId}/reject`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                body: JSON.stringify({ reason: rejectionReason.trim() || null }),
+                body: JSON.stringify({ reason: reason.trim() || null }),
             });
             
             if (!response.ok) {
@@ -298,15 +357,83 @@ const AdminPage: React.FC = () => {
         }
     };
 
+    const renderApplicationsTab = () => {
+        if (isLoading) {
+            return <div className={styles.loading}>Loading applications...</div>;
+        }
+
+        if (pendingUsers.length === 0) {
+            return <div className={styles.noApplications}>No pending applications</div>;
+        }
+
+        return (
+            <div className={styles.applicationsList}>
+                {pendingUsers.map((user) => (
+                    <div key={user.id} className={styles.applicationCard}>
+                        <h3>{user.full_name || user.username}</h3>
+                        <div className={styles.applicationDetails}>
+                            <p><strong>Username:</strong> {user.username}</p>
+                            <p><strong>Date of Birth:</strong> {formatDate(user.date_of_birth)}</p>
+                            <p><strong>Address:</strong> {user.address || 'Not provided'}</p>
+                            <p><strong>Mobile Number:</strong> {user.mobile_number || 'Not provided'}</p>
+                            <p>
+                                <strong>Face Enrollment Status:</strong>{' '}
+                                <span className={user.face_descriptors ? styles.enrolled : styles.notEnrolled}>
+                                    {user.face_descriptors ? 'Enrolled' : 'Not Enrolled'}
+                                </span>
+                            </p>
+                            
+                            <div className={styles.photoComparison}>
+                                {user.id_proof_filename && (
+                                    <div className={styles.photoContainer}>
+                                        <strong>ID Proof:</strong>
+                                        <img
+                                            src={`/api/admin/id-proof/${user.id_proof_filename}`}
+                                            alt={`${user.username}'s ID Proof`}
+                                            className={styles.verificationImage}
+                                        />
+                                    </div>
+                                )}
+                                
+                                {user.realtime_photo_filename && (
+                                    <div className={styles.photoContainer}>
+                                        <strong>Real-time Photo:</strong>
+                                        <img
+                                            src={`/api/admin/realtime-photo/${user.realtime_photo_filename}`}
+                                            alt={`${user.username}'s Real-time Photo`}
+                                            className={styles.verificationImage}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className={styles.applicationActions}>
+                            <button
+                                onClick={() => handleApproveUser(user.id)}
+                                className={`${styles.button} ${styles.approveButton}`}
+                                disabled={isLoading}
+                            >
+                                Approve
+                            </button>
+                            <button
+                                onClick={() => openRejectDialog(user.id)}
+                                className={`${styles.button} ${styles.rejectButton}`}
+                                disabled={isLoading}
+                            >
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     return (
         <div className={styles.container}>
             <h1 className={styles.title}>Admin Dashboard</h1>
-            <button 
-                onClick={() => navigate('/')}
-                className={styles.homeButton}
-            >
-                Back to Home
-            </button>
+            
             
             <div className={styles.tabs}>
                 <button
@@ -463,114 +590,15 @@ const AdminPage: React.FC = () => {
                     {error && <div className={styles.error}>{error}</div>}
                     {successMessage && <div className={styles.success}>{successMessage}</div>}
                     
-                    {isLoading && <div className={styles.loading}>Loading applications...</div>}
+                    {renderApplicationsTab()}
                     
-                    {!isLoading && pendingUsers.length === 0 ? (
-                        <div className={styles.emptyMessage}>No pending applications</div>
-                    ) : (
-                        <div className={styles.applicationsTable}>
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Username</th>
-                                        <th>Full Name</th>
-                                        <th>Address</th>
-                                        <th>Mobile</th>
-                                        <th>Date of Birth</th>
-                                        <th>ID Proof</th>
-                                        <th>Face Data</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {pendingUsers.map(user => (
-                                        <tr key={user.id}>
-                                            <td>{user.username}</td>
-                                            <td>{user.full_name || '-'}</td>
-                                            <td>{user.address || '-'}</td>
-                                            <td>{user.mobile_number || '-'}</td>
-                                            <td>{formatDate(user.date_of_birth)}</td>
-                                            <td>
-                                                {user.id_proof_filename ? (
-                                                    <div>
-                                                        {/\.(jpe?g|png)$/i.test(user.id_proof_filename) ? (
-                                                            <img
-                                                                src={`http://localhost:3001/api/admin/id-proof/${user.id_proof_filename}`}
-                                                                alt={`${user.username}'s ID Proof`}
-                                                                style={{ maxWidth: '200px', maxHeight: '200px', display: 'block', marginTop: '5px' }}
-                                                                className={styles.idProofImage}
-                                                            />
-                                                        ) : /\.(pdf)$/i.test(user.id_proof_filename) ? (
-                                                            <a
-                                                                href={`http://localhost:3001/api/admin/id-proof/${user.id_proof_filename}`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className={styles.pdfLink}
-                                                            >
-                                                                View PDF Proof
-                                                            </a>
-                                                        ) : (
-                                                            <span>Unsupported proof format</span>
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    'Not uploaded'
-                                                )}
-                                            </td>
-                                            <td>{user.face_descriptors ? 'Available' : 'Not captured'}</td>
-                                            <td className={styles.actionButtons}>
-                                                <button 
-                                                    className={`${styles.button} ${styles.approveButton}`}
-                                                    onClick={() => handleApproveUser(user.id)}
-                                                    disabled={isLoading}
-                                                >
-                                                    Approve
-                                                </button>
-                                                <button 
-                                                    className={`${styles.button} ${styles.rejectButton}`}
-                                                    onClick={() => openRejectDialog(user.id)}
-                                                    disabled={isLoading}
-                                                >
-                                                    Reject
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                    
-                    {userToReject && (
-                        <div className={styles.modalOverlay}>
-                            <div className={styles.modalContent}>
-                                <h3>Reject Application</h3>
-                                <p>You are about to reject this user application. You may optionally provide a reason.</p>
-                                <textarea
-                                    className={styles.textArea}
-                                    value={rejectionReason}
-                                    onChange={(e) => setRejectionReason(e.target.value)}
-                                    placeholder="Reason for rejection (optional)"
-                                    rows={4}
-                                />
-                                <div className={styles.modalButtons}>
-                                    <button 
-                                        className={`${styles.button} ${styles.cancelButton}`}
-                                        onClick={closeRejectDialog}
-                                        disabled={isLoading}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button 
-                                        className={`${styles.button} ${styles.rejectButton}`}
-                                        onClick={handleRejectUser}
-                                        disabled={isLoading}
-                                    >
-                                        {isLoading ? 'Rejecting...' : 'Confirm Reject'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    {isRejectModalOpen && (
+                        <RejectionModal
+                            isOpen={isRejectModalOpen}
+                            onClose={closeRejectDialog}
+                            onSubmit={handleRejectUser}
+                            isLoading={isLoading}
+                        />
                     )}
                 </section>
             )}

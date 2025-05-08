@@ -8,6 +8,7 @@ const router = Router();
 
 // Set up ID proof upload directory
 const ID_PROOF_UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads', 'id_proofs');
+const REALTIME_PHOTO_UPLOAD_DIR = path.join(__dirname, '..', '..', 'uploads', 'realtime_photos');
 
 // Admin middleware
 const isAdmin = (req: Request, res: Response, next: NextFunction) => {
@@ -33,6 +34,28 @@ router.get('/id-proof/:filename', (req, res) => {
     // res.sendFile will handle non-existent files by erroring,
     // which express default error handler will catch.
     // For production, add fs.access check.
+
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error("Error sending file:", err);
+            if (!res.headersSent) {
+               if ((err as any).code === 'ENOENT') {
+                    res.status(404).send('File not found.');
+               } else {
+                    res.status(500).send('Error serving file.');
+               }
+            }
+        }
+    });
+});
+
+// Real-time photo file serving endpoint
+router.get('/realtime-photo/:filename', (req, res) => {
+    const { filename } = req.params;
+    if (!filename || !/^[a-zA-Z0-9_.-]+$/.test(filename)) { // Basic sanitization
+        return res.status(400).send('Invalid filename.');
+    }
+    const filePath = path.join(REALTIME_PHOTO_UPLOAD_DIR, filename);
 
     res.sendFile(filePath, (err) => {
         if (err) {
@@ -295,7 +318,8 @@ router.get('/users', (req, res) => {
 // Get all pending user applications
 router.get('/users/pending', (req, res) => {
     db.all(
-        `SELECT id, username, full_name, address, mobile_number, date_of_birth, id_proof_filename, face_descriptors 
+        `SELECT id, username, full_name, address, mobile_number, date_of_birth, 
+         id_proof_filename, realtime_photo_filename, face_descriptors 
          FROM users 
          WHERE application_status = 'Pending'`, 
         (err, rows) => {

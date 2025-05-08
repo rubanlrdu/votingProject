@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './RegisterPage.module.css';
+import RealtimePhotoCapture from '../components/RealtimePhotoCapture';
 
 const RegisterPage: React.FC = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const [fullName, setFullName] = useState('');
     const [dateOfBirth, setDateOfBirth] = useState('');
     const [address, setAddress] = useState('');
     const [mobileNumber, setMobileNumber] = useState('');
     const [idProofFile, setIdProofFile] = useState<File | null>(null);
+    const [realtimePhotoFile, setRealtimePhotoFile] = useState<File | null>(null);
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -23,10 +26,32 @@ const RegisterPage: React.FC = () => {
         });
     };
 
+    const validatePassword = (pass: string) => {
+        if (pass.length < 8) {
+            setPasswordError('Password must be at least 8 characters long');
+            return false;
+        }
+        setPasswordError('');
+        return true;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
+
+        // Validate password before submission
+        if (!validatePassword(password)) {
+            setIsLoading(false);
+            return;
+        }
+
+        // Check if real-time photo is captured
+        if (!realtimePhotoFile) {
+            setError('Please capture a real-time photo.');
+            setIsLoading(false);
+            return;
+        }
 
         try {
             // Create FormData object instead of direct JSON
@@ -42,6 +67,9 @@ const RegisterPage: React.FC = () => {
             if (idProofFile) {
                 formData.append('idProof', idProofFile);
             }
+
+            // Add real-time photo file
+            formData.append('realtimePhoto', realtimePhotoFile);
 
             const response = await fetch('http://localhost:3001/api/auth/register', {
                 method: 'POST',
@@ -97,10 +125,15 @@ const RegisterPage: React.FC = () => {
                             type="password"
                             id="password"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={(e) => {
+                                setPassword(e.target.value);
+                                validatePassword(e.target.value);
+                            }}
                             required
-                            className={styles.input}
+                            className={`${styles.input} ${passwordError ? styles.inputError : ''}`}
                         />
+                        {passwordError && <div className={styles.error}>{passwordError}</div>}
+                        <p className={styles.helpText}>Password must be at least 8 characters long</p>
                     </div>
                     <div className={styles.formGroup}>
                         <label htmlFor="fullName">Full Name*</label>
@@ -151,7 +184,7 @@ const RegisterPage: React.FC = () => {
                         />
                     </div>
                     <div className={styles.formGroup}>
-                        <label htmlFor="idProof">National ID Proof (Image or PDF):</label>
+                        <label htmlFor="idProof">National ID Proof (Image or PDF)*</label>
                         <input
                             type="file"
                             id="idProof"
@@ -165,9 +198,32 @@ const RegisterPage: React.FC = () => {
                                 }
                             }}
                             className={styles.input}
+                            required
                         />
                         {idProofFile && <p className={styles.fileDetails}>Selected file: {idProofFile.name}</p>}
+                        <p className={styles.helpText}>Please upload a clear image or PDF of your National ID. Maximum file size: 5MB</p>
                     </div>
+
+                    <div className={styles.formGroup}>
+                        <label>Real-time Photo*</label>
+                        <RealtimePhotoCapture
+                            onPhotoCaptured={(file) => {
+                                setRealtimePhotoFile(file);
+                            }}
+                        />
+                        {realtimePhotoFile && (
+                            <div className={styles.photoPreview}>
+                                <p>Real-time photo captured:</p>
+                                <img 
+                                    src={URL.createObjectURL(realtimePhotoFile)} 
+                                    alt="Real-time capture preview" 
+                                    style={{maxWidth: '200px', borderRadius: '4px'}} 
+                                />
+                            </div>
+                        )}
+                        <p className={styles.helpText}>Please take a clear photo of yourself for verification purposes.</p>
+                    </div>
+
                     <p className={styles.disclaimer}>
                         Fields marked with * are required. Your personal information will be used
                         for verification purposes only. <strong>Face enrollment will be required after
@@ -175,8 +231,8 @@ const RegisterPage: React.FC = () => {
                     </p>
                     <button
                         type="submit"
+                        className={styles.submitButton}
                         disabled={isLoading}
-                        className={styles.button}
                     >
                         {isLoading ? 'Registering...' : 'Register'}
                     </button>
