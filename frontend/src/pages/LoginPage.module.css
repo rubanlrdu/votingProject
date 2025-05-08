@@ -1,9 +1,45 @@
+.outerContainer {
+    display: flex;
+    min-height: 100vh;
+     /* or your background image/gradient */
+}
+
+.leftText {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    padding-right: 3rem;
+    padding-left: 3rem;
+    background: transparent; /* or a color/gradient if you want */
+}
+
+.leftText h1 {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #111;
+    text-align: right;
+    margin-bottom: 1rem;
+}
+
+.leftText .highlight {
+    color: #18d3c2; /* or your accent color */
+}
+
+.leftText .subtitle {
+    color: #888;
+    font-size: 1.1rem;
+    text-align: right;
+}
+
 .container {
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #f5f5f5;
+    background: transparent; /* or your background */
 }
 
 .formContainer {
@@ -39,6 +75,7 @@
 }
 
 .input {
+    width: 92%;
     padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -47,12 +84,12 @@
 
 .input:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: #18d3c2;
 }
 
 .button {
     padding: 0.75rem;
-    background-color: #007bff;
+    background-color: #18d3c2 !important;
     color: white;
     border: none;
     border-radius: 4px;
@@ -62,7 +99,7 @@
 }
 
 .button:hover {
-    background-color: #0056b3;
+    background-color: #06a497 !important;
 }
 
 .button:disabled {
@@ -87,7 +124,7 @@
 .linkButton {
     background: none;
     border: none;
-    color: #007bff;
+    color: #18d3c2;
     cursor: pointer;
     padding: 0;
     font-size: inherit;

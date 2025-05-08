@@ -14,3 +14,4 @@
 8.Added optional pre-vote face check, display enhanced candidate info, ensure overall flow works.
 9.added forgot password option.
 9.1.added missing elements for navigation.
+9.2.Improved Visuals.

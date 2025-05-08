@@ -113,7 +113,7 @@ const AppContent: React.FC = () => {
           <Link to="/results">Results</Link>
           {user ? (
             <>
-              {user.isAdmin && <Link to="/admin">Admin</Link>}
+              {user.isAdmin && <Link to="/admin">Admin Dashboard</Link>}
               <Link to="/profile">My Profile</Link>
               <button onClick={logout} className="logout-button">Logout</button>
             </>
@@ -159,6 +159,11 @@ const AppContent: React.FC = () => {
               <div className="main-container">
                 <div className="content-container">
                   <h1>Welcome, {user?.username}!</h1>
+                  <img
+                    src="/public/home-ui.png"
+                    alt="Home UI"
+                    className="centered-image"
+                  />
                   {user && !user.isAdmin && (
                     <p className="vote-instruction">
                       {user.has_voted ? 

@@ -1,5 +1,5 @@
 .container {
-    max-width: 800px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 2rem;
 }
@@ -45,12 +45,12 @@
 
 .input:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: #18d3c2 !important;
 }
 
 .button {
     padding: 0.75rem 1.5rem;
-    background-color: #007bff;
+    background-color: #18d3c2 !important;
     color: white;
     border: none;
     border-radius: 4px;
@@ -60,7 +60,7 @@
 }
 
 .button:hover {
-    background-color: #0056b3;
+    background-color: #06a497 !important;
 }
 
 .button:disabled {
@@ -145,6 +145,8 @@
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
+    justify-content: center;
+    /*align-items: center;*/
 }
 
 .tabButton {
@@ -162,9 +164,9 @@
 }
 
 .tabButton.active {
-    background-color: #007bff;
+    background-color: #c618d3 !important;
     color: white;
-    border-color: #007bff;
+    border-color: #3f0054 !important;
 }
 
 .publishButton {
@@ -226,7 +228,7 @@
 }
 
 .rejectButton {
-    background-color: #dc3545;
+    background-color: #dc3545 !important;
 }
 
 .rejectButton:hover {

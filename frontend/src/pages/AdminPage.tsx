@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import styles from './AdminPage.module.css';
 
+
+
 interface Candidate {
     id: number;
     name: string;
@@ -456,12 +458,7 @@ const AdminPage: React.FC = () => {
             {activeTab === 'applications' && (
                 <section className={styles.section}>
                     <h2>Pending User Applications</h2>
-                    <button 
-                        onClick={() => setActiveTab('dashboard')}
-                        className={styles.backButton}
-                    >
-                        Back to Dashboard
-                    </button>
+                    
                     
                     {error && <div className={styles.error}>{error}</div>}
                     {successMessage && <div className={styles.success}>{successMessage}</div>}

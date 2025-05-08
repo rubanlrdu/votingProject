@@ -123,89 +123,100 @@ const LoginPage: React.FC = () => {
     };
 
     return (
-        <div className={styles.container}>
-            <div className={`${styles.formContainer} ${requireFaceVerification ? styles.verificationActive : ''}`}>
-                {!requireFaceVerification ? (
-                    <>
-                        <h1 className={styles.title}>Login</h1>
-                        
-                        {error && <div className={styles.error}>{error}</div>}
-                        {successMessage && <div className={styles.successMessage}>{successMessage}</div>}
-                        
-                        <form onSubmit={handleSubmit} className={styles.form}>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="username">Username</label>
-                                <input
-                                    type="text"
-                                    id="username"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    required
-                                    className={styles.input}
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
-                                <label htmlFor="password">Password</label>
-                                <input
-                                    type="password"
-                                    id="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    className={styles.input}
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className={styles.button}
-                            >
-                                {isLoading ? 'Logging in...' : 'Login'}
-                            </button>
-                            <p>
-                                <a href="/forgot-password">Forgot Password?</a>
+        <div className={styles.outerContainer}>
+            <div className={styles.leftText}>
+                <h1>
+                    Vote from <br />
+                    your <span className={styles.highlight}>home.</span>
+                </h1>
+                <p className={styles.subtitle}>
+                    Self Tallying Voting Platform Integrated with Blockchain.
+                </p>
+            </div>
+            <div className={styles.container}>
+                <div className={`${styles.formContainer} ${requireFaceVerification ? styles.verificationActive : ''}`}>
+                    {!requireFaceVerification ? (
+                        <>
+                            <h1 className={styles.title}>Login</h1>
+                            
+                            {error && <div className={styles.error}>{error}</div>}
+                            {successMessage && <div className={styles.successMessage}>{successMessage}</div>}
+                            
+                            <form onSubmit={handleSubmit} className={styles.form}>
+                                <div className={styles.formGroup}>
+                                    <label htmlFor="username">Username</label>
+                                    <input
+                                        type="text"
+                                        id="username"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        required
+                                        className={styles.input}
+                                    />
+                                </div>
+                                <div className={styles.formGroup}>
+                                    <label htmlFor="password">Password</label>
+                                    <input
+                                        type="password"
+                                        id="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        className={styles.input}
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className={styles.button}
+                                >
+                                    {isLoading ? 'Logging in...' : 'Login'}
+                                </button>
+                                <p>
+                                    <a href="/forgot-password">Forgot Password?</a>
+                                </p>
+                            </form>
+                            <p className={styles.registerLink}>
+                                Don't have an account?{' '}
+                                <button
+                                    onClick={() => navigate('/register')}
+                                    className={styles.linkButton}
+                                >
+                                    Register
+                                </button>
                             </p>
-                        </form>
-                        <p className={styles.registerLink}>
-                            Don't have an account?{' '}
+                        </>
+                    ) : (
+                        <>
+                            <h1 className={styles.title}>Face Verification Required</h1>
+                            <p className={styles.verificationMessage}>
+                                Please verify your identity to complete login.
+                            </p>
+                            {error && <div className={styles.error}>{error}</div>}
+                            {successMessage && <div className={styles.successMessage}>{successMessage}</div>}
+                            
+                            <div className={styles.verificationContainer}>
+                                {userData && (
+                                    <FaceVerification
+                                        userId={userData.id.toString()}
+                                        onVerificationSuccess={handleVerificationSuccess}
+                                        onVerificationFail={handleVerificationFail}
+                                    />
+                                )}
+                            </div>
+                            
                             <button
-                                onClick={() => navigate('/register')}
-                                className={styles.linkButton}
+                                onClick={() => {
+                                    setRequireFaceVerification(false);
+                                    logout();
+                                }}
+                                className={styles.cancelButton}
                             >
-                                Register
+                                Cancel
                             </button>
-                        </p>
-                    </>
-                ) : (
-                    <>
-                        <h1 className={styles.title}>Face Verification Required</h1>
-                        <p className={styles.verificationMessage}>
-                            Please verify your identity to complete login.
-                        </p>
-                        {error && <div className={styles.error}>{error}</div>}
-                        {successMessage && <div className={styles.successMessage}>{successMessage}</div>}
-                        
-                        <div className={styles.verificationContainer}>
-                            {userData && (
-                                <FaceVerification
-                                    userId={userData.id.toString()}
-                                    onVerificationSuccess={handleVerificationSuccess}
-                                    onVerificationFail={handleVerificationFail}
-                                />
-                            )}
-                        </div>
-                        
-                        <button
-                            onClick={() => {
-                                setRequireFaceVerification(false);
-                                logout();
-                            }}
-                            className={styles.cancelButton}
-                        >
-                            Cancel
-                        </button>
-                    </>
-                )}
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );
