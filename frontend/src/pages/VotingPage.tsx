@@ -191,12 +191,7 @@ const VotingPage: React.FC = () => {
                 <div className={styles.message}>
                     You have already submitted your vote. Thank you for participating!
                 </div>
-                <button 
-                    onClick={() => navigate('/')}
-                    className={styles.homeButton}
-                >
-                    Back to Home
-                </button>
+                
             </div>
         );
     }
