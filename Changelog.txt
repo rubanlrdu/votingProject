@@ -17,3 +17,5 @@
 9.2.Improved Visuals.
 10.Added a delete profile option if application gets rejected.
 11.Improved Contract Code
+12.Changed Face Detection Model.
+12.1. Fixed face detection on login.

@@ -162,13 +162,16 @@ const FaceEnrollment: React.FC<FaceEnrollmentProps> = ({ userId, onEnrollmentCom
             ctx.fillRect(10, 10, 300, 30);
             ctx.font = '14px Arial';
             ctx.fillStyle = 'black';
-            ctx.fillText('Scanning for face... (confidence: 0.3)', 15, 30);
+            ctx.fillText('Scanning for face... (confidence: 0.8)', 15, 30);
           }
 
-          // Detect face using SSD MobileNet for better accuracy
+          // Detect face using MTCNN for better accuracy
           const detection = await faceapi.detectSingleFace(
             videoRef.current,
-            new faceapi.SsdMobilenetv1Options({ minConfidence: 0.3 })
+            new faceapi.MtcnnOptions({ 
+              minFaceSize: 50,
+              scoreThresholds: [0.2, 0.2, 0.2]
+            })
           )
             .withFaceLandmarks()
             .withFaceDescriptor();

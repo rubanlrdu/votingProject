@@ -22,9 +22,15 @@ const LoginPage: React.FC = () => {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [requireFaceVerification, setRequireFaceVerification] = useState(false);
     const [userData, setUserData] = useState<UserData | null>(null);
-    const { login, isAuthenticated, logout } = useAuth();
+    const { 
+        login, 
+        isAuthenticated, 
+        logout, 
+        requireFaceVerification, 
+        setRequireFaceVerification,
+        completeFaceVerification 
+    } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -38,12 +44,12 @@ const LoginPage: React.FC = () => {
         }
     }, [location, navigate]);
 
-    // Redirect if already logged in, but only if not waiting for face verification
+    // Redirect if already logged in and face verification is not required
     useEffect(() => {
         if (isAuthenticated && !requireFaceVerification) {
-            navigate('/');
+            navigate('/vote');
         }
-    }, [isAuthenticated, navigate, requireFaceVerification]);
+    }, [isAuthenticated, requireFaceVerification, navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -69,7 +75,6 @@ const LoginPage: React.FC = () => {
             // Check application status
             if (data.application_status === 'Approved' && !data.isAdmin) {
                 // For approved non-admin users, check if face verification is required
-                // First, check if user has face data enrolled
                 const profileResponse = await fetch('http://localhost:3001/api/auth/me', {
                     credentials: 'include',
                 });
@@ -84,16 +89,13 @@ const LoginPage: React.FC = () => {
                     // User has face data, require verification
                     setRequireFaceVerification(true);
                     setUserData(data);
-                    
-                    // Save user temporarily but don't navigate
-                    // Navigation will happen after face verification
                     return;
                 }
             }
 
             // For users who don't need face verification, proceed normally
             login(data);
-            // Redirect will happen via the useEffect
+            navigate('/vote');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed');
         } finally {
@@ -103,14 +105,12 @@ const LoginPage: React.FC = () => {
     
     const handleVerificationSuccess = () => {
         if (userData) {
-            // Complete the login process
-            login(userData);
+            // Complete the login process using the new function
+            completeFaceVerification(userData);
             setSuccessMessage('Face verification successful!');
             
-            // Navigate to vote page
-            setTimeout(() => {
-                navigate('/vote');
-            }, 1000);
+            // Navigate to vote page immediately
+            navigate('/vote');
         }
     };
     

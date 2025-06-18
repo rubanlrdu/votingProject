@@ -35,7 +35,7 @@ const SimpleFaceEnrollment: React.FC<SimpleFaceEnrollmentProps> = ({ userId, onE
         
         // Check if models directory exists
         try {
-          const testFetch = await fetch(`${MODEL_URL}/tiny_face_detector_model-weights_manifest.json`);
+          const testFetch = await fetch(`${MODEL_URL}/mtcnn_model-weights_manifest.json`);
           setDebugInfo(prev => [...prev, `Model manifest fetch status: ${testFetch.status}`]);
           if (!testFetch.ok) {
             throw new Error(`Model manifest fetch failed with status: ${testFetch.status}`);
@@ -45,8 +45,9 @@ const SimpleFaceEnrollment: React.FC<SimpleFaceEnrollmentProps> = ({ userId, onE
           throw fetchError;
         }
         
+        // Load all required models including MTCNN
         await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+          faceapi.nets.mtcnn.loadFromUri(MODEL_URL),
           faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
           faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
         ]);
@@ -116,6 +117,12 @@ const SimpleFaceEnrollment: React.FC<SimpleFaceEnrollmentProps> = ({ userId, onE
       canvasRef.current.height = videoRef.current.videoHeight || 480;
     }
     
+    // Use MTCNN for face detection with lower thresholds
+    const options = new faceapi.MtcnnOptions({ 
+      minFaceSize: 50,  // Reduced minimum face size
+      scoreThresholds: [0.2, 0.2, 0.2]  // Lowered thresholds for better detection
+    });
+    
     // Start detection loop
     const interval = setInterval(async () => {
       if (!videoRef.current || !canvasRef.current) return;
@@ -136,12 +143,6 @@ const SimpleFaceEnrollment: React.FC<SimpleFaceEnrollmentProps> = ({ userId, onE
           return [...newDebugInfo, `Video: ${JSON.stringify(videoDimensions)}`];
         });
       }
-      
-      // Lower confidence threshold further
-      const options = new faceapi.TinyFaceDetectorOptions({ 
-        inputSize: 320, 
-        scoreThreshold: 0.2  // Lowered from 0.3 to 0.2 for better detection
-      });
       
       try {
         // Add timing information
@@ -186,7 +187,7 @@ const SimpleFaceEnrollment: React.FC<SimpleFaceEnrollmentProps> = ({ userId, onE
         ctx.fillStyle = '#ffffff';
         ctx.font = '14px Arial';
         ctx.fillText(`Canvas: ${canvasRef.current.width}x${canvasRef.current.height}`, 15, 30);
-        ctx.fillText(`Face detection active: threshold = 0.2`, 15, 50);
+        ctx.fillText(`Face detection active: threshold = 0.6, 0.7, 0.7`, 15, 50);
         ctx.fillText(`Face detected: ${result ? 'YES' : 'NO'}`, 15, 70);
         ctx.fillText(`Detection state: ${isDetecting ? 'RUNNING' : 'IDLE'}`, 15, 90);
         
@@ -348,10 +349,7 @@ const SimpleFaceEnrollment: React.FC<SimpleFaceEnrollmentProps> = ({ userId, onE
     
     try {
       // Try the lowest possible threshold
-      const options = new faceapi.TinyFaceDetectorOptions({ 
-        inputSize: 160, // Smaller for faster processing
-        scoreThreshold: 0.1  // Very low threshold
-      });
+      const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.8 });
       
       // Get video element dimensions for canvas
       canvasRef.current.width = videoRef.current.videoWidth || 640;

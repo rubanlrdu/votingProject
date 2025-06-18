@@ -559,8 +559,8 @@ router.post('/verify-face', (req, res) => {
         distance = Math.sqrt(distance);
         
         // Define threshold for verification
-        // Face-api.js typically uses 0.6 as a threshold for recognition
-        const threshold = 0.6;
+        // Using a stricter threshold of 0.4 for better security
+        const threshold = 0.4;
         const verified = distance < threshold;
         
         console.log(`Face verification for user ${userId}: distance=${distance.toFixed(4)}, threshold=${threshold}, verified=${verified}`);
@@ -694,14 +694,14 @@ router.post('/forgot-password/verify-face', (req, res) => {
                 return res.status(500).json({ success: false, error: 'Failed to process stored face data' });
             }
 
-            // Compare descriptors (Euclidean distance, threshold 0.6 as in /verify-face)
+            // Compare descriptors (Euclidean distance, threshold 0.4 for better security)
             let distance = 0;
             for (let i = 0; i < liveDescriptor.length; i++) {
                 const diff = liveDescriptor[i] - storedDescriptor[i];
                 distance += diff * diff;
             }
             distance = Math.sqrt(distance);
-            const threshold = 0.6;
+            const threshold = 0.4;  // Stricter threshold for better security
             const verified = distance < threshold;
 
             if (verified) {
